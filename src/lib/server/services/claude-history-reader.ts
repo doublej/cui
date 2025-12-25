@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
-import { ConversationSummary, ConversationMessage, ConversationListQuery, CUIError } from '@/types/index.js';
+import { ConversationSummary, ConversationMessage, ConversationListQuery, CUIError } from '$lib/server/types/index.js';
 import { createLogger, type Logger } from './logger.js';
 import { SessionInfoService } from './session-info-service.js';
 import { ConversationCache, ConversationChain } from './conversation-cache.js';

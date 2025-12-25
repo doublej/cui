@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import { setGlobalDispatcher, ProxyAgent } from 'undici';
-import { CUIError } from '@/types/index.js';
-import { createLogger, type Logger } from '@/services/logger.js';
+import { CUIError } from '$lib/server/types/index.js';
+import { createLogger, type Logger } from '$lib/server/services/logger.js';
 import { ConfigService } from './config-service.js';
 
 // Set up proxy support using environment variables (production only)

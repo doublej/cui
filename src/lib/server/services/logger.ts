@@ -112,7 +112,7 @@ class LoggerService {
       const logLine = chunk.toString().trim();
       if (logLine) {
         // Lazy load to avoid circular dependency
-        import('@/services/log-stream-buffer').then(({ logStreamBuffer }) => {
+        import('$lib/server/services/log-stream-buffer').then(({ logStreamBuffer }) => {
           logStreamBuffer.addLog(logLine);
         }).catch(() => {
           // Silently ignore if log buffer is not available

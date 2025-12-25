@@ -1,4 +1,4 @@
-import { ConversationMessage } from '@/types/index.js';
+import { ConversationMessage } from '$lib/server/types/index.js';
 import { createLogger, type Logger } from './logger.js';
 import Anthropic from '@anthropic-ai/sdk';
 

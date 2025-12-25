@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { StreamEvent } from '@/types/index.js';
+import { StreamEvent } from '$lib/server/types/index.js';
 import { EventEmitter } from 'events';
 import { createLogger } from './logger.js';
 import { type Logger } from './logger.js';

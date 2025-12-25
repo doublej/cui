@@ -4,7 +4,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { existsSync, constants } from 'fs';
 import ignore from 'ignore';
-import { CUIError, FileSystemEntry } from '@/types/index.js';
+import { CUIError, FileSystemEntry } from '$lib/server/types/index.js';
 import { createLogger } from './logger.js';
 import { type Logger } from './logger.js';
 

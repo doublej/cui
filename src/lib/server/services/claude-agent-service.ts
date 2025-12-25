@@ -7,7 +7,7 @@ import {
   StreamEvent,
   CUIError,
   PermissionRequest,
-} from '@/types/index.js';
+} from '$lib/server/types/index.js';
 import { createLogger, type Logger } from './logger.js';
 import { PermissionTracker } from './permission-tracker.js';
 import { ClaudeHistoryReader } from './claude-history-reader.js';

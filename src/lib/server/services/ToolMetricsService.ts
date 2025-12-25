@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { ToolMetrics, StreamEvent, AssistantStreamMessage } from '@/types/index.js';
+import { ToolMetrics, StreamEvent, AssistantStreamMessage } from '$lib/server/types/index.js';
 import { createLogger, type Logger } from './logger.js';
 import Anthropic from '@anthropic-ai/sdk';
 import { diffLines } from 'diff';

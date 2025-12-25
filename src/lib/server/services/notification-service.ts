@@ -1,4 +1,4 @@
-import { PermissionRequest } from '@/types/index.js';
+import { PermissionRequest } from '$lib/server/types/index.js';
 import { createLogger, type Logger } from './logger.js';
 import { ConfigService } from './config-service.js';
 import { WebPushService } from './web-push-service.js';

@@ -1,4 +1,4 @@
-import { WorkingDirectory, WorkingDirectoriesResponse } from '@/types/index.js';
+import { WorkingDirectory, WorkingDirectoriesResponse } from '$lib/server/types/index.js';
 import { ClaudeHistoryReader } from './claude-history-reader.js';
 import { Logger } from './logger.js';
 

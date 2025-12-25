@@ -2,11 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
-import { CUIConfig, DEFAULT_CONFIG, InterfaceConfig, ServerConfig } from '@/types/config.js';
-import { generateMachineId } from '@/utils/machine-id.js';
+import { CUIConfig, DEFAULT_CONFIG, InterfaceConfig, ServerConfig } from '$lib/server/types/config.js';
+import { generateMachineId } from '$lib/server/utils/machine-id.js';
 import { createLogger, type Logger } from './logger.js';
 import { EventEmitter } from 'events';
-import type { RouterConfiguration, RouterProvider } from '@/types/router-config.js';
+import type { RouterConfiguration, RouterProvider } from '$lib/server/types/router-config.js';
 
 /**
  * ConfigService manages CUI configuration

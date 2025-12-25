@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import Database from 'better-sqlite3';
-import type { SessionInfo } from '@/types/index.js';
+import type { SessionInfo } from '$lib/server/types/index.js';
 import { createLogger } from './logger.js';
 import { type Logger } from './logger.js';
 
