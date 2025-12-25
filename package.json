@@ -1,24 +1,15 @@
 {
-  "name": "cui-server",
-  "version": "0.6.3",
+  "name": "cui-agentsdk-svelte",
+  "version": "0.1.0",
   "type": "module",
-  "description": "Web UI Agent Platform based on Claude Code",
-  "main": "dist/cui-server.js",
-  "bin": {
-    "cui-server": "dist/server.js"
-  },
-  "files": [
-    "dist/**/*",
-    "config/**/*",
-    "scripts/postinstall.js"
-  ],
+  "description": "Svelte-based Agent UI Platform using Claude Agent SDK",
   "keywords": [
     "claude",
-    "claude-code",
+    "claude-agent-sdk",
+    "svelte",
+    "sveltekit",
     "ai",
-    "web-ui",
-    "agent",
-    "mcp"
+    "agent"
   ],
   "author": "Wenbo Pan",
   "license": "Apache-2.0",

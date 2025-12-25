@@ -70,4 +70,4 @@ Located in `src/web/` with entry at `src/web/main.tsx`:
 - Events flow: `ClaudeAgentService` -> `StreamManager` -> SSE clients
 - Routes are in `src/routes/` and created with factory functions accepting services
 - Auth middleware protects `/api/*` routes except `/api/system`, `/api/permissions`, `/api/notifications`
-- Configuration loaded from `~/.config/cui/config.json` via `ConfigService`
+- Configuration loaded from `~/.cui/config.json` via `ConfigService`

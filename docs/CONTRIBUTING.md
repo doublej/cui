@@ -12,27 +12,28 @@ Thank you for your interest in contributing to CUI! This guide will help you get
 
 ## Project Overview
 
-CUI is a web interface for the Claude CLI tool, consisting of:
-- TypeScript Express backend that manages Claude CLI processes
-- React frontend with ultra clean minimalistic design
+CUI is a web-based agent platform that wraps the Claude Agent SDK, consisting of:
+- TypeScript Express backend that manages Claude queries via SDK
+- React frontend with Tailwind CSS
 - Single-port architecture (port 3001)
-- Real-time streaming of Claude responses via newline-delimited JSON
-- MCP (Model Context Protocol) integration for permission management
+- Real-time streaming via SSE (Server-Sent Events)
+- Permission handling via SDK callbacks
 
 ### Architecture
 
 #### Backend Services (`src/services/`)
-- **ClaudeProcessManager**: Spawns and manages Claude CLI processes
-- **StreamManager**: Handles HTTP streaming connections for real-time updates
+- **ClaudeAgentService**: Uses Claude Agent SDK's `query()` function, handles permissions via `canUseTool` callback
+- **StreamManager**: SSE broadcast to connected web clients per streaming session
 - **ClaudeHistoryReader**: Reads conversation history from ~/.claude directory
-- **CUIMCPServer**: MCP server for handling tool permission requests
+- **PermissionTracker**: Tracks tool permission requests from SDK callbacks
 - **SessionInfoService**: Manages extended session metadata
+- **ConfigService**: Loads configuration from ~/.cui/config.json
 
 #### Frontend (`src/web/`)
-- **chat/**: Main chat application components
-- **console/**: Console/log viewer components  
-- **api/**: API client using fetch for backend communication
-- **styles/**: CSS modules with ultra clean minimalistic design
+- **chat/**: Main chat UI components (ChatApp, MessageList, Composer, ToolRendering)
+- **chat/contexts/**: ConversationsContext, PreferencesContext, StreamStatusContext
+- **chat/hooks/**: React hooks for streaming, preferences, themes
+- **chat/components/ui/**: Radix UI primitives
 
 #### API Routes (`src/routes/`)
 - Conversations API: Start, list, get, continue, stop conversations
@@ -43,60 +44,54 @@ CUI is a web interface for the Claude CLI tool, consisting of:
 ## Development Setup
 
 ### Prerequisites
-- Node.js 20.x or 22.x
-- npm (comes with Node.js)
+- Node.js >= 20.19.0
+- Bun (package manager)
 - Git
 
 ### Getting Started
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/PanBananowy/ccui.git
-   cd ccui
+   git clone https://github.com/BMPixel/cui.git
+   cd cui
    ```
 
 2. Install dependencies:
    ```bash
-   npm ci
+   bun install
    ```
 
-3. Build the project (required before first test run):
+3. Start development server:
    ```bash
-   npm run build
-   ```
-
-4. Start development server:
-   ```bash
-   npm run dev  # Backend + frontend on port 3001
+   bun run dev  # Backend + frontend on port 3001
    ```
 
 ### Essential Commands
 
 ```bash
-npm run dev          # Start dev server
-npm run build        # Build both frontend and backend
-npm run test         # Run all tests
-npm run typecheck    # TypeScript type checking
-npm run lint         # ESLint checking
+bun run dev          # Start dev server
+bun run build        # Build both frontend and backend
+bun run test         # Run all tests
+bun run typecheck    # TypeScript type checking
+bun run lint         # ESLint checking
 ```
 
 ### Development Gotchas
 
-- Before running tests for the first time, run `npm run build` to build the MCP executable
-- Do not run `npm run dev` to verify frontend updates during testing
-- Enable debug logs with: `LOG_LEVEL=debug npm run dev`
+- Do not run `bun run dev` to verify frontend updates during testing
+- Enable debug logs with: `LOG_LEVEL=debug bun run dev`
 
 ## Testing Requirements
 
 ### Running Tests
 
 ```bash
-npm run test                # Run all tests
-npm run unit-tests          # Run unit tests only
-npm run integration-tests   # Run integration tests only
-npm run test:coverage       # Generate coverage report
-npm run test:watch          # Watch mode for TDD
-npm run test:debug          # Verbose output for debugging
+bun run test                # Run all tests
+bun run unit-tests          # Run unit tests only
+bun run integration-tests   # Run integration tests only
+bun run test:coverage       # Generate coverage report
+bun run test:watch          # Watch mode for TDD
+bun run test:debug          # Verbose output for debugging
 ```
 
 ### Test Coverage Requirements
@@ -109,7 +104,7 @@ All pull requests must meet the following coverage thresholds:
 
 The CI pipeline will automatically check these thresholds. To verify locally:
 ```bash
-npm run test:coverage
+bun run test:coverage
 ```
 
 ### Writing Tests
@@ -136,8 +131,8 @@ npm run test:coverage
    - Never expose or log secrets/keys
 
 3. **Key Patterns to Follow**:
-   - **Streaming Architecture**: Use newline-delimited JSON (not SSE)
-   - **Process Management**: Each conversation = separate Claude CLI process
+   - **Streaming Architecture**: Use SSE (Server-Sent Events) for real-time updates
+   - **SDK Integration**: Use Claude Agent SDK's `query()` with async iterators
    - **Error Handling**: Use custom error types with proper HTTP status codes
    - **Frontend**: Use React Router v6 for navigation
 
@@ -161,9 +156,9 @@ Use appropriate labels:
 1. **Before Creating a PR**:
    - Create an issue first to discuss the change
    - Fork the repository and create a feature branch
-   - Ensure all tests pass: `npm run test`
-   - Run linting: `npm run lint`
-   - Run type checking: `npm run typecheck`
+   - Ensure all tests pass: `bun run test`
+   - Run linting: `bun run lint`
+   - Run type checking: `bun run typecheck`
    - Add/update tests for your changes
    - Update documentation if needed
 
@@ -209,10 +204,9 @@ Use appropriate labels:
 
 ### Important Implementation Notes
 
-- MCP permission requests must be handled synchronously
-- Process spawn arguments are built dynamically based on options
+- Permission requests are handled via SDK's `canUseTool` callback
 - Ensure proper cleanup when modifying streaming logic
-- Test with different Node.js versions (20.x and 22.x)
+- Test with Node.js >= 20.19.0
 
 ## Getting Help
 
