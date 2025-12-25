@@ -1,18 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import { createConversationRoutes } from '@/routes/conversation.routes';
-import { ClaudeProcessManager } from '@/services/claude-process-manager';
+import { ClaudeAgentService } from '@/services/claude-agent-service';
 import { ClaudeHistoryReader } from '@/services/claude-history-reader';
 import { SessionInfoService } from '@/services/session-info-service';
 import { ConversationStatusManager } from '@/services/conversation-status-manager';
-import { ToolMetricsService } from '@/services/ToolMetricsService';
 
 vi.mock('@/services/logger.js');
 
 describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
   let app: express.Application;
-  let processManager: vi.Mocked<ClaudeProcessManager>;
+  let agentService: vi.Mocked<ClaudeAgentService>;
   let sessionInfoService: vi.Mocked<SessionInfoService>;
   let historyReader: vi.Mocked<ClaudeHistoryReader>;
   let conversationStatusManager: vi.Mocked<ConversationStatusManager>;
@@ -21,7 +20,7 @@ describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
     app = express();
     app.use(express.json());
 
-    processManager = {
+    agentService = {
       startConversation: vi.fn(),
     } as any;
 
@@ -45,7 +44,7 @@ describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
     };
 
     app.use('/api/conversations', createConversationRoutes(
-      processManager,
+      agentService,
       historyReader,
       mockServices.statusTracker,
       sessionInfoService,
@@ -72,7 +71,7 @@ describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
         apiKeySource: 'env'
       };
 
-      processManager.startConversation.mockResolvedValue({
+      agentService.startConversation.mockResolvedValue({
         streamingId: 'stream-123',
         systemInit: mockSystemInit
       });
@@ -88,7 +87,7 @@ describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.sessionId).toBe('new-session-123');
-      expect(processManager.startConversation).toHaveBeenCalledWith(
+      expect(agentService.startConversation).toHaveBeenCalledWith(
         expect.objectContaining({
           workingDirectory: '/path/to/project',
           initialPrompt: 'Hello Claude!',
@@ -117,7 +116,7 @@ describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
       historyReader.fetchConversation.mockResolvedValue(mockPreviousMessages as any);
       sessionInfoService.getSessionInfo.mockResolvedValue({ permission_mode: 'default' } as any);
 
-      processManager.startConversation.mockResolvedValue({
+      agentService.startConversation.mockResolvedValue({
         streamingId: 'stream-123',
         systemInit: mockSystemInit
       });
@@ -144,8 +143,8 @@ describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
         { continuation_session_id: 'new-session-123' }
       );
 
-      // Verify process manager was called with previous messages
-      expect(processManager.startConversation).toHaveBeenCalledWith(
+      // Verify agent service was called with previous messages
+      expect(agentService.startConversation).toHaveBeenCalledWith(
         expect.objectContaining({
           workingDirectory: '/path/to/git/repo',
           initialPrompt: 'Continue the conversation',
@@ -202,7 +201,7 @@ describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
       historyReader.fetchConversation.mockResolvedValue([]);
       sessionInfoService.getSessionInfo.mockResolvedValue({ permission_mode: 'bypassPermissions' } as any);
 
-      processManager.startConversation.mockResolvedValue({
+      agentService.startConversation.mockResolvedValue({
         streamingId: 'stream-123',
         systemInit: mockSystemInit
       });
@@ -217,7 +216,7 @@ describe('Conversation Routes - Unified Start/Resume Endpoint', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(processManager.startConversation).toHaveBeenCalledWith(
+      expect(agentService.startConversation).toHaveBeenCalledWith(
         expect.objectContaining({
           permissionMode: 'bypassPermissions'
         })

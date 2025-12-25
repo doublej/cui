@@ -37,9 +37,8 @@
     "dev": "NODE_ENV=development tsx watch src/server.ts",
     "dev:web": "NODE_ENV=development npx vite",
     "clean": "rm -rf dist",
-    "build": "npm run clean && NODE_ENV=production npm run build:web && tsc && tsc-alias && npm run build:mcp",
+    "build": "npm run clean && NODE_ENV=production npm run build:web && tsc && tsc-alias",
     "build:web": "NODE_ENV=production vite build",
-    "build:mcp": "chmod +x dist/mcp-server/index.js",
     "start": "NODE_ENV=production node dist/server.js",
     "test": "NODE_ENV=test vitest run",
     "test:debug": "NODE_ENV=test LOG_LEVEL=debug vitest run",
@@ -54,6 +53,7 @@
     "postinstall": "node scripts/postinstall.js"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.76",
     "@anthropic-ai/claude-code": "^1.0.70",
     "@anthropic-ai/sdk": "^0.54.0",
     "@google/genai": "^1.11.0",

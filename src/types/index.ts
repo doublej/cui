@@ -70,7 +70,7 @@ export interface UserStreamMessage extends StreamMessage {
 
 export interface ResultStreamMessage extends StreamMessage {
   type: 'result';
-  subtype: 'success' | 'error_max_turns';
+  subtype: 'success' | 'error_max_turns' | 'error_during_execution' | 'error_max_budget_usd' | 'error_max_structured_output_retries';
   is_error: boolean;
   duration_ms: number;
   duration_api_ms: number;

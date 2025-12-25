@@ -14,7 +14,7 @@ import {
   SessionInfo
 } from '@/types/index.js';
 import { RequestWithRequestId } from '@/types/express.js';
-import { ClaudeProcessManager } from '@/services/claude-process-manager.js';
+import { ClaudeAgentService } from '@/services/claude-agent-service.js';
 import { ClaudeHistoryReader } from '@/services/claude-history-reader.js';
 import { SessionInfoService } from '@/services/session-info-service.js';
 import { ConversationStatusManager } from '@/services/conversation-status-manager.js';
@@ -22,7 +22,7 @@ import { createLogger } from '@/services/logger.js';
 import { ToolMetricsService } from '@/services/ToolMetricsService.js';
 
 export function createConversationRoutes(
-  processManager: ClaudeProcessManager,
+  agentService: ClaudeAgentService,
   historyReader: ClaudeHistoryReader,
   statusTracker: ConversationStatusManager,
   sessionInfoService: SessionInfoService,
@@ -113,7 +113,7 @@ export function createConversationRoutes(
         permissionMode: req.body.permissionMode || inheritedPermissionMode
       };
       
-      const { streamingId, systemInit } = await processManager.startConversation(conversationConfig);
+      const { streamingId, systemInit } = await agentService.startConversation(conversationConfig);
       
       // Update original session with continuation session ID if resuming
       if (req.body.resumedSessionId) {
@@ -374,7 +374,7 @@ export function createConversationRoutes(
     });
     
     try {
-      const success = await processManager.stopConversation(streamingId);
+      const success = await agentService.stopConversation(streamingId);
       
       logger.debug('Stop conversation result', {
         requestId,

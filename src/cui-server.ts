@@ -7,11 +7,10 @@ import { displayServerStartup } from './utils/server-startup.js';
 // Get the directory of this module for serving static files
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-import { ClaudeProcessManager } from './services/claude-process-manager.js';
+import { ClaudeAgentService } from './services/claude-agent-service.js';
 import { StreamManager } from './services/stream-manager.js';
 import { ClaudeHistoryReader } from './services/claude-history-reader.js';
 import { PermissionTracker } from './services/permission-tracker.js';
-import { MCPConfigGenerator } from './services/mcp-config-generator.js';
 import { FileSystemService } from './services/file-system-service.js';
 import { ConfigService } from './services/config-service.js';
 import { SessionInfoService } from './services/session-info-service.js';
@@ -53,12 +52,11 @@ let ViteExpress: typeof import('vite-express') | undefined;
 export class CUIServer {
   private app: Express;
   private server?: import('http').Server;
-  private processManager: ClaudeProcessManager;
+  private agentService: ClaudeAgentService;
   private streamManager: StreamManager;
   private historyReader: ClaudeHistoryReader;
   private statusTracker: ConversationStatusManager;
   private permissionTracker: PermissionTracker;
-  private mcpConfigGenerator: MCPConfigGenerator;
   private fileSystemService: FileSystemService;
   private configService: ConfigService;
   private sessionInfoService: SessionInfoService;
@@ -103,27 +101,33 @@ export class CUIServer {
     this.statusTracker = this.conversationStatusManager; // Use the same instance for backward compatibility
     this.toolMetricsService = new ToolMetricsService();
     this.fileSystemService = new FileSystemService();
-    this.processManager = new ClaudeProcessManager(this.historyReader, this.statusTracker, undefined, undefined, this.toolMetricsService, this.sessionInfoService, this.fileSystemService);
-    this.streamManager = new StreamManager();
     this.permissionTracker = new PermissionTracker();
-    this.mcpConfigGenerator = new MCPConfigGenerator(this.fileSystemService);
+    this.agentService = new ClaudeAgentService(
+      this.historyReader,
+      this.statusTracker,
+      this.permissionTracker,
+      this.toolMetricsService,
+      this.sessionInfoService,
+      this.fileSystemService
+    );
+    this.streamManager = new StreamManager();
     this.workingDirectoriesService = new WorkingDirectoriesService(this.historyReader, this.logger);
     this.notificationService = new NotificationService();
     this.webPushService = WebPushService.getInstance();
-    
+
     // Wire up notification service
-    this.processManager.setNotificationService(this.notificationService);
+    this.agentService.setNotificationService(this.notificationService);
     this.permissionTracker.setNotificationService(this.notificationService);
     this.permissionTracker.setConversationStatusManager(this.conversationStatusManager);
     this.permissionTracker.setHistoryReader(this.historyReader);
-    
+
     this.logger.debug('Services initialized successfully');
-    
+
     this.setupMiddleware();
     // Routes will be set up in start() to allow tests to override services
-    this.setupProcessManagerIntegration();
+    this.setupAgentServiceIntegration();
     this.setupPermissionTrackerIntegration();
-    this.processManager.setConversationStatusManager(this.conversationStatusManager);
+    this.agentService.setConversationStatusManager(this.conversationStatusManager);
   }
 
   /**
@@ -185,32 +189,7 @@ export class CUIServer {
       // This allows tests to override services before routes are created
       this.logger.debug('Setting up routes');
       this.setupRoutes();
-      
-      // Generate MCP config before starting server
-      try {
-        const mcpConfigPath = await this.mcpConfigGenerator.generateConfig(this.port);
-        this.processManager.setMCPConfigPath(mcpConfigPath);
-        this.logger.debug('MCP config generated and set', { path: mcpConfigPath });
-      } catch (error) {
-        const isTestEnv = process.env.NODE_ENV === 'test';
-        
-        if (isTestEnv) {
-          this.logger.warn('MCP config generation failed in test environment, proceeding without MCP', {
-            error: error instanceof Error ? error.message : String(error)
-          });
-          // Don't set MCP config path - conversations will run without MCP
-        } else {
-          this.logger.error('MCP config generation failed in production environment', {
-            error: error instanceof Error ? error.message : String(error)
-          });
-          throw new CUIError(
-            'MCP_CONFIG_REQUIRED',
-            `MCP server files are required in production but not found: ${error instanceof Error ? error.message : String(error)}`,
-            500
-          );
-        }
-      }
-      
+
       // Display server startup information
       displayServerStartup({
         host: this.host,
@@ -338,14 +317,14 @@ export class CUIServer {
   async stop(): Promise<void> {
     this.logger.debug('Stop method called', {
       hasServer: !!this.server,
-      activeSessions: this.processManager.getActiveSessions().length,
+      activeSessions: this.agentService.getActiveSessions().length,
       connectedClients: this.streamManager.getTotalClientCount()
     });
 
     if (this.routerService) {
       await this.routerService.stop();
     }
-    
+
     // Stop accepting new connections
     if (this.server) {
       // Since Node v18.2.0, closeAllConnections is available to close all connections.
@@ -353,20 +332,20 @@ export class CUIServer {
         this.server.closeAllConnections();
       }
     }
-    
-    // Stop all active Claude processes
-    const activeSessions = this.processManager.getActiveSessions();
+
+    // Stop all active Claude queries
+    const activeSessions = this.agentService.getActiveSessions();
     if (activeSessions.length > 0) {
       this.logger.info(`Stopping ${activeSessions.length} active sessions...`);
       this.logger.debug('Active sessions to stop', { sessionIds: activeSessions });
-      
+
       const stopResults = await Promise.allSettled(
-        activeSessions.map(streamingId => 
-          this.processManager.stopConversation(streamingId)
+        activeSessions.map(streamingId =>
+          this.agentService.stopConversation(streamingId)
             .catch(error => this.logger.error(`Error stopping session ${streamingId}:`, error))
         )
       );
-      
+
       this.logger.debug('Session stop results', {
         total: stopResults.length,
         fulfilled: stopResults.filter(r => r.status === 'fulfilled').length,
@@ -377,11 +356,7 @@ export class CUIServer {
     // Disconnect all streaming clients
     this.logger.debug('Disconnecting all streaming clients');
     this.streamManager.disconnectAll();
-    
-    // Clean up MCP config
-    this.logger.debug('Cleaning up MCP config');
-    this.mcpConfigGenerator.cleanup();
-    
+
     // Only close server in test environment
     if (process.env.NODE_ENV === 'test' && this.server) {
       this.logger.debug('Closing HTTP server (test environment)');
@@ -452,14 +427,14 @@ export class CUIServer {
 
   private setupRoutes(): void {
     // System routes (includes health check) - before auth
-    this.app.use('/api/system', createSystemRoutes(this.processManager, this.historyReader));
-    this.app.use('/', createSystemRoutes(this.processManager, this.historyReader)); // For /health at root
-    
-    // Permission routes - before auth (needed for MCP server communication)
+    this.app.use('/api/system', createSystemRoutes(this.agentService, this.historyReader));
+    this.app.use('/', createSystemRoutes(this.agentService, this.historyReader)); // For /health at root
+
+    // Permission routes - before auth (needed for permission handling)
     this.app.use('/api/permissions', createPermissionRoutes(this.permissionTracker));
     // Notifications routes - before auth (needed for service worker subscription on first load)
     this.app.use('/api/notifications', createNotificationsRoutes(this.webPushService));
-    
+
     // Apply auth middleware to all other API routes unless skipAuthToken is set
     if (!this.configOverrides?.skipAuthToken) {
       if (this.configOverrides?.token) {
@@ -473,10 +448,10 @@ export class CUIServer {
     } else {
       this.logger.warn('Authentication middleware is disabled - API endpoints are not protected!');
     }
-    
+
     // API routes
     this.app.use('/api/conversations', createConversationRoutes(
-      this.processManager,
+      this.agentService,
       this.historyReader,
       this.statusTracker,
       this.sessionInfoService,
@@ -504,23 +479,23 @@ export class CUIServer {
     this.app.use(errorHandler);
   }
 
-  private setupProcessManagerIntegration(): void {
-    this.logger.debug('Setting up ProcessManager integration with StreamManager');
-    
+  private setupAgentServiceIntegration(): void {
+    this.logger.debug('Setting up AgentService integration with StreamManager');
+
     // Set up tool metrics service to listen to claude messages
-    this.toolMetricsService.listenToClaudeMessages(this.processManager);
-    
+    this.toolMetricsService.listenToClaudeMessages(this.agentService);
+
     // Forward Claude messages to stream
-    this.processManager.on('claude-message', ({ streamingId, message }) => {
-      this.logger.debug('Received claude-message event', { 
-        streamingId, 
+    this.agentService.on('claude-message', ({ streamingId, message }) => {
+      this.logger.debug('Received claude-message event', {
+        streamingId,
         messageType: message?.type,
         messageSubtype: message?.subtype,
         hasContent: !!message?.content,
         contentLength: message?.content?.length || 0,
         messageKeys: message ? Object.keys(message) : []
       });
-      
+
       // Skip broadcasting system init messages as they're now included in API response
       if (message && message.type === 'system' && message.subtype === 'init') {
         this.logger.debug('Skipping broadcast of system init message (included in API response)', {
@@ -529,31 +504,29 @@ export class CUIServer {
         });
         return;
       }
-      
+
       // Stream other Claude messages as normal
-      this.logger.debug('Broadcasting message to StreamManager', { 
-        streamingId, 
+      this.logger.debug('Broadcasting message to StreamManager', {
+        streamingId,
         messageType: message?.type,
         messageSubtype: message?.subtype
       });
       this.streamManager.broadcast(streamingId, message);
     });
 
-    // Handle process closure
-    this.processManager.on('process-closed', ({ streamingId, code }) => {
+    // Handle query closure
+    this.agentService.on('process-closed', ({ streamingId, code }) => {
       this.logger.debug('Received process-closed event, closing StreamManager session', {
         streamingId,
         exitCode: code,
         clientCount: this.streamManager.getClientCount(streamingId),
         wasSuccessful: code === 0
       });
-      
+
       // Unregister session from status tracker
       this.logger.debug('Unregistering session from status tracker', { streamingId });
       this.statusTracker.unregisterActiveSession(streamingId);
-      
-      // Clean up conversation context (handled automatically in unregisterActiveSession)
-      
+
       // Clean up permissions for this streaming session
       const removedCount = this.permissionTracker.removePermissionsByStreamingId(streamingId);
       if (removedCount > 0) {
@@ -563,47 +536,41 @@ export class CUIServer {
         });
       }
 
-      if (code === 0) {
-        // Session completion notification removed
-      }
-
       this.streamManager.closeSession(streamingId);
     });
 
-    // Handle process errors
-    this.processManager.on('process-error', ({ streamingId, error }) => {
-      this.logger.debug('Received process-error event, forwarding to StreamManager', { 
-        streamingId, 
+    // Handle query errors
+    this.agentService.on('process-error', ({ streamingId, error }) => {
+      this.logger.debug('Received process-error event, forwarding to StreamManager', {
+        streamingId,
         error,
         errorLength: error?.toString().length || 0,
         clientCount: this.streamManager.getClientCount(streamingId)
       });
-      
+
       // Unregister session from status tracker on error
       this.logger.debug('Unregistering session from status tracker due to error', { streamingId });
       this.statusTracker.unregisterActiveSession(streamingId);
-      
-      // Clean up conversation context on error (handled automatically in unregisterActiveSession)
-      
+
       const errorEvent: StreamEvent = {
         type: 'error' as const,
         error: error.toString(),
         streamingId: streamingId,
         timestamp: new Date().toISOString()
       };
-      
+
       this.logger.debug('Broadcasting error event to clients', {
         streamingId,
         errorEventKeys: Object.keys(errorEvent)
       });
-      
+
       this.streamManager.broadcast(streamingId, errorEvent);
     });
-    
-    this.logger.debug('ProcessManager integration setup complete', {
-      totalEventListeners: this.processManager.listenerCount('claude-message') + 
-                          this.processManager.listenerCount('process-closed') + 
-                          this.processManager.listenerCount('process-error')
+
+    this.logger.debug('AgentService integration setup complete', {
+      totalEventListeners: this.agentService.listenerCount('claude-message') +
+                          this.agentService.listenerCount('process-closed') +
+                          this.agentService.listenerCount('process-error')
     });
   }
 
@@ -645,7 +612,7 @@ export class CUIServer {
         this.logger.info('Router disabled in configuration, stopping router service');
         await this.routerService.stop();
         this.routerService = undefined;
-        this.processManager.setRouterService(undefined);
+        this.agentService.setRouterService(undefined);
       } else {
         this.logger.info('Router service is disabled');
       }
@@ -664,7 +631,7 @@ export class CUIServer {
       }
       this.routerService = new ClaudeRouterService(config.router);
       await this.routerService.initialize();
-      this.processManager.setRouterService(this.routerService);
+      this.agentService.setRouterService(this.routerService);
       this.logger.info('Router service initialized');
     } catch (error) {
       this.logger.error('Router initialization failed, continuing without router', error);

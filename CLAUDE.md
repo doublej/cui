@@ -1,98 +1,78 @@
-# Testing Architecture
+# CLAUDE.md
 
-This directory contains comprehensive test coverage for CUI services.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Testing Philosophy
+## Project Overview
 
-- **Prefer real implementations** over mocks when testing (per project guidelines)
-- **Comprehensive unit test coverage** for all services (90%+ target)
-- **Mock Claude CLI** using `tests/__mocks__/claude` script for consistent testing
-- **Silent logging** in tests (LOG_LEVEL=silent) to reduce noise
+CUI (Claude UI) is a web-based agent platform that wraps the Claude Code CLI (`@anthropic-ai/claude-code`). It provides a React frontend for interacting with Claude through a Node.js/Express backend that manages Claude CLI processes, SSE streaming, and MCP (Model Context Protocol) integration.
 
-## Test Structure
-
-```
-tests/
-├── __mocks__
-│   └── claude
-├── integration
-│   ├── conversation-status-integration.test.ts
-│   ├── real-claude-integration.test.ts
-│   └── streaming-integration.test.ts
-├── setup.ts
-├── unit
-│   ├── cui-server.test.ts
-│   ├── claude-history-reader.test.ts
-│   ├── claude-process-long-running.test.ts
-│   ├── claude-process-manager.test.ts
-│   ├── cli
-│   │   ├── get.test.ts
-│   │   ├── list.test.ts
-│   │   ├── serve.test.ts
-│   │   ├── status-simple.test.ts
-│   │   ├── status-working.test.ts
-│   │   └── status.test.ts
-│   ├── conversation-status-tracker.test.ts
-│   ├── json-lines-parser.test.ts
-│   └── stream-manager.test.ts
-└── utils
-    └── test-helpers.ts
-```
-
-## Mock Claude CLI
-
-The project includes a mock Claude CLI (`tests/__mocks__/claude`) that:
-- Simulates real Claude CLI behavior for testing
-- Outputs valid JSONL stream format
-- Supports various command line arguments
-- Enables testing without requiring actual Claude CLI installation
-
-## Testing Patterns
-
-```typescript
-// Integration test pattern with mock Claude CLI
-function getMockClaudeExecutablePath(): string {
-  return path.join(process.cwd(), 'tests', '__mocks__', 'claude');
-}
-
-// Server setup with random port to avoid conflicts
-const serverPort = 9000 + Math.floor(Math.random() * 1000);
-const server = new CUIServer({ port: serverPort });
-
-// Override ProcessManager with mock path
-const mockClaudePath = getMockClaudeExecutablePath();
-const { ClaudeProcessManager } = await import('@/services/claude-process-manager');
-(server as any).processManager = new ClaudeProcessManager(mockClaudePath);
-```
-
-## Test Configuration
-
-- **Vitest** for fast and modern testing with TypeScript support
-- **Path mapping** using `@/` aliases matching source structure
-
-## Test Commands
+## Commands
 
 ```bash
-# Run specific test files
-npm test -- claude-process-manager.test.ts
-npm test -- tests/unit/
+# Development
+npm run dev          # Start backend with tsx watch + Vite dev server
+npm run dev:web      # Start only Vite frontend dev server
 
-# Run tests matching a pattern
-npm test -- --testNamePattern="should start conversation"
+# Build
+npm run build        # Full production build (web + server + MCP)
+npm run typecheck    # Type checking without emit
 
-# Run unit tests only
-npm run unit-tests
+# Testing
+npm test                      # Run all tests
+npm run unit-tests            # Run unit tests only
+npm run integration-tests     # Run integration tests only
+npm test -- <pattern>         # Run specific test file
+npm run test:coverage         # Run with coverage
 
-# Run integration tests only
-npm run integration-tests
-
-# Run with coverage
-npm run test:coverage
+# Linting
+npm run lint         # ESLint on src/**/*.ts
 ```
 
-## Development Practices
+## Architecture
 
-- **Meaningful test names** and comprehensive test coverage
-- **Silent logging** in tests (LOG_LEVEL=silent) to reduce noise
-- **Random ports** for server tests to avoid conflicts
-- **Proper cleanup** of resources and processes in tests
+### Backend (Express + TypeScript)
+
+**Entry Points:**
+- `src/server.ts` - CLI entrypoint with signal handlers
+- `src/cui-server.ts` - Main server class, wires all services and routes
+
+**Core Services (`src/services/`):**
+- `claude-process-manager.ts` - Spawns/manages Claude CLI child processes, emits events for stdout/close/errors
+- `stream-manager.ts` - SSE broadcast to connected web clients per streaming session
+- `permission-tracker.ts` - Tracks tool permission requests from MCP server
+- `claude-history-reader.ts` - Reads Claude's SQLite session history database
+- `json-lines-parser.ts` - Parses JSONL stream from Claude CLI stdout
+
+**Key Flow:**
+1. Frontend calls `POST /api/conversations` with initial prompt
+2. `ClaudeProcessManager` spawns Claude CLI with `--output-format stream-json`
+3. JSONL messages are parsed and emitted as `claude-message` events
+4. `StreamManager` broadcasts events via SSE to connected clients
+5. MCP server handles permission requests through `POST /api/permissions/notify`
+
+### Frontend (React + Vite + Tailwind)
+
+Located in `src/web/` with entry at `src/web/main.tsx`:
+- `chat/` - Main chat UI components (ChatApp, MessageList, Composer, ToolRendering)
+- `hooks/` - React hooks for streaming, preferences, themes
+- `contexts/` - ConversationsContext, PreferencesContext, StreamStatusContext
+- Uses Radix UI primitives in `chat/components/ui/`
+
+### MCP Server (`src/mcp-server/`)
+
+A separate MCP server process that handles permission prompts from Claude CLI. Gets spawned with each conversation and communicates back to CUI server via HTTP.
+
+## Testing
+
+- Uses Vitest with `tests/__mocks__/claude` mock executable
+- Integration tests spawn actual server on random ports (9000-9999)
+- Set `LOG_LEVEL=silent` in tests (configured in `tests/setup.ts`)
+- Path alias `@/` maps to `src/` in both source and tests
+
+## Key Patterns
+
+- Services are initialized in `CUIServer` constructor and wired together
+- Events flow: `ClaudeProcessManager` -> `StreamManager` -> SSE clients
+- Routes are in `src/routes/` and created with factory functions accepting services
+- Auth middleware protects `/api/*` routes except `/api/system`, `/api/permissions`, `/api/notifications`
+- Configuration loaded from `~/.config/cui/config.json` via `ConfigService`

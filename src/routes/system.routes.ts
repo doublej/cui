@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { SystemStatusResponse, CUIError, CommandsResponse } from '@/types/index.js';
 import { RequestWithRequestId } from '@/types/express.js';
-import { ClaudeProcessManager } from '@/services/claude-process-manager.js';
+import { ClaudeAgentService } from '@/services/claude-agent-service.js';
 import { ClaudeHistoryReader } from '@/services/claude-history-reader.js';
 import { createLogger, type Logger } from '@/services/logger.js';
 import { getAvailableCommands } from '@/services/commands-service.js';
@@ -9,7 +9,7 @@ import { ConfigService } from '@/services/config-service.js';
 import { execSync } from 'child_process';
 
 export function createSystemRoutes(
-  processManager: ClaudeProcessManager,
+  agentService: ClaudeAgentService,
   historyReader: ClaudeHistoryReader
 ): Router {
   const router = Router();
@@ -29,9 +29,9 @@ export function createSystemRoutes(
   router.get('/status', async (req: RequestWithRequestId, res, next) => {
     const requestId = req.requestId;
     logger.debug('Get system status request', { requestId });
-    
+
     try {
-      const systemStatus = await getSystemStatus(processManager, historyReader, logger);
+      const systemStatus = await getSystemStatus(agentService, historyReader, logger);
       
       logger.debug('System status retrieved', {
         requestId,
@@ -85,39 +85,38 @@ export function createSystemRoutes(
  * Get system status including Claude version and active conversations
  */
 async function getSystemStatus(
-  processManager: ClaudeProcessManager,
+  agentService: ClaudeAgentService,
   historyReader: ClaudeHistoryReader,
   logger: Logger
 ): Promise<SystemStatusResponse> {
   try {
-    // Get Claude version
-    let claudeVersion = 'unknown';
-    let claudePath = 'unknown';
-    
+    // Get Claude version (from SDK, not CLI)
+    let claudeVersion = 'Agent SDK';
+    let claudePath = '@anthropic-ai/claude-agent-sdk';
+
     try {
+      // Try to get CLI version for reference
       claudePath = execSync('which claude', { encoding: 'utf-8' }).trim();
       claudeVersion = execSync('claude --version', { encoding: 'utf-8' }).trim();
-      logger.debug('Claude version info retrieved', {
+      logger.debug('Claude CLI version info retrieved', {
         version: claudeVersion,
         path: claudePath
       });
-    } catch (error) {
-      logger.warn('Failed to get Claude version information', { 
-        error: error instanceof Error ? error.message : String(error),
-        errorCode: error instanceof Error && 'code' in error ? (error as NodeJS.ErrnoException).code : undefined
-      });
+    } catch (_error) {
+      // CLI not installed, using SDK only
+      logger.debug('Claude CLI not found, using Agent SDK');
     }
-    
+
     // Get machine ID from config
     const configService = ConfigService.getInstance();
     const config = configService.getConfig();
     const machineId = config.machine_id;
-    
+
     return {
       claudeVersion,
       claudePath,
       configPath: historyReader.homePath,
-      activeConversations: processManager.getActiveSessions().length,
+      activeConversations: agentService.getActiveSessions().length,
       machineId
     };
   } catch (_error) {

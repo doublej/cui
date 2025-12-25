@@ -1,8 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, afterAll, vi } from 'vitest';
 // Mock all dependencies BEFORE importing anything
-// Need to mock the actual paths that CUIServer imports (relative paths)
-vi.mock('@/services/claude-process-manager.js', () => ({
-  ClaudeProcessManager: vi.fn()
+vi.mock('@/services/claude-agent-service.js', () => ({
+  ClaudeAgentService: vi.fn()
 }));
 vi.mock('@/services/claude-history-reader.js', () => ({
   ClaudeHistoryReader: vi.fn()
@@ -14,39 +13,27 @@ vi.mock('@/services/conversation-status-manager.js', () => ({
   ConversationStatusManager: vi.fn()
 }));
 
-// Mock web-push
-
 import { CUIServer } from '@/cui-server';
-import { ClaudeProcessManager } from '@/services/claude-process-manager.js';
+import { ClaudeAgentService } from '@/services/claude-agent-service.js';
 import { ClaudeHistoryReader } from '@/services/claude-history-reader.js';
 import { StreamManager } from '@/services/stream-manager.js';
 import { ConversationStatusManager } from '@/services/conversation-status-manager.js';
 import { CUIError } from '@/types';
 import request from 'supertest';
-import { TestHelpers } from '../utils/test-helpers';
-import * as path from 'path';
 
 // Mock child_process for execSync and exec calls
 vi.mock('child_process', () => ({
   execSync: vi.fn(),
   exec: vi.fn((cmd, callback) => {
-    // Default mock implementation for exec
     callback(null, '', '');
   })
 }));
 
-
-// Get mock Claude executable path
-function getMockClaudeExecutablePath(): string {
-  return path.join(process.cwd(), 'tests', '__mocks__', 'claude');
-}
-
-// Import execSync from child_process
 import { execSync } from 'child_process';
 
 describe('CUIServer', () => {
   let server: CUIServer;
-  let mockProcessManager: vi.Mocked<ClaudeProcessManager>;
+  let mockAgentService: vi.Mocked<ClaudeAgentService>;
   let mockHistoryReader: vi.Mocked<ClaudeHistoryReader>;
   let mockStreamManager: vi.Mocked<StreamManager>;
   let mockStatusTracker: vi.Mocked<ConversationStatusManager>;
@@ -56,15 +43,14 @@ describe('CUIServer', () => {
 
   beforeEach(() => {
     // Setup mock implementations
-    mockProcessManager = {
+    mockAgentService = {
       startConversation: vi.fn(),
       stopConversation: vi.fn(),
       getActiveSessions: vi.fn(),
       isSessionActive: vi.fn(),
-      setMCPConfigPath: vi.fn(),
-      setStreamManager: vi.fn(),
-      setPermissionTracker: vi.fn(),
       setConversationStatusManager: vi.fn(),
+      setNotificationService: vi.fn(),
+      setRouterService: vi.fn(),
       on: vi.fn(),
       emit: vi.fn()
     } as any;
@@ -179,7 +165,7 @@ describe('CUIServer', () => {
       expect(server).toBeDefined();
       // Since the constructor did run, we can assume the services were instantiated
       // Let's test that the server instance has the right properties
-      expect((server as any).processManager).toBeDefined();
+      expect((server as any).agentService).toBeDefined();
       expect((server as any).streamManager).toBeDefined();
       expect((server as any).historyReader).toBeDefined();
     });
@@ -196,7 +182,7 @@ describe('CUIServer', () => {
       
       // Verify the server was created with its services
       expect(server).toBeDefined();
-      expect((server as any).processManager).toBeDefined();
+      expect((server as any).agentService).toBeDefined();
       expect((server as any).streamManager).toBeDefined();
       expect((server as any).historyReader).toBeDefined();
       
@@ -211,7 +197,7 @@ describe('CUIServer', () => {
 
       // Server should initialize all components normally
       expect(testServer).toBeDefined();
-      expect((testServer as any).processManager).toBeDefined();
+      expect((testServer as any).agentService).toBeDefined();
       expect((testServer as any).streamManager).toBeDefined();
       expect((testServer as any).historyReader).toBeDefined();
     });
@@ -357,7 +343,7 @@ describe('CUIServer', () => {
       // Since mocking isn't working properly, let's just test that the server
       // was created with the required components that would handle events
       expect(server).toBeDefined();
-      expect((server as any).processManager).toBeDefined();
+      expect((server as any).agentService).toBeDefined();
       expect((server as any).streamManager).toBeDefined();
       
       // This test would require proper mocking to work completely
@@ -369,7 +355,7 @@ describe('CUIServer', () => {
       
       // Verify the server has the required components
       expect(server).toBeDefined();
-      expect((server as any).processManager).toBeDefined();
+      expect((server as any).agentService).toBeDefined();
       expect((server as any).streamManager).toBeDefined();
     });
 
@@ -378,7 +364,7 @@ describe('CUIServer', () => {
       
       // Verify the server has the required components
       expect(server).toBeDefined();
-      expect((server as any).processManager).toBeDefined();
+      expect((server as any).agentService).toBeDefined();
       expect((server as any).streamManager).toBeDefined();
     });
   });
@@ -473,7 +459,7 @@ describe('CUIServer', () => {
         await server.start();
         
         // Mock the getActiveSessions method on the actual instance
-        vi.spyOn((server as any).processManager, 'getActiveSessions').mockReturnValue([]);
+        vi.spyOn((server as any).agentService, 'getActiveSessions').mockReturnValue([]);
         vi.spyOn((server as any).streamManager, 'disconnectAll').mockImplementation(() => {});
 
         await server.stop();
@@ -486,16 +472,16 @@ describe('CUIServer', () => {
         await server.start();
         
         const activeSessions = ['session-1', 'session-2', 'session-3'];
-        vi.spyOn((server as any).processManager, 'getActiveSessions').mockReturnValue(activeSessions);
-        vi.spyOn((server as any).processManager, 'stopConversation').mockResolvedValue(true);
+        vi.spyOn((server as any).agentService, 'getActiveSessions').mockReturnValue(activeSessions);
+        vi.spyOn((server as any).agentService, 'stopConversation').mockResolvedValue(true);
         vi.spyOn((server as any).streamManager, 'disconnectAll').mockImplementation(() => {});
 
         await server.stop();
 
-        expect((server as any).processManager.stopConversation).toHaveBeenCalledTimes(3);
-        expect((server as any).processManager.stopConversation).toHaveBeenCalledWith('session-1');
-        expect((server as any).processManager.stopConversation).toHaveBeenCalledWith('session-2');
-        expect((server as any).processManager.stopConversation).toHaveBeenCalledWith('session-3');
+        expect((server as any).agentService.stopConversation).toHaveBeenCalledTimes(3);
+        expect((server as any).agentService.stopConversation).toHaveBeenCalledWith('session-1');
+        expect((server as any).agentService.stopConversation).toHaveBeenCalledWith('session-2');
+        expect((server as any).agentService.stopConversation).toHaveBeenCalledWith('session-3');
         expect((server as any).streamManager.disconnectAll).toHaveBeenCalled();
       });
 
@@ -504,15 +490,15 @@ describe('CUIServer', () => {
         await server.start();
         
         const activeSessions = ['session-1', 'session-2'];
-        vi.spyOn((server as any).processManager, 'getActiveSessions').mockReturnValue(activeSessions);
-        vi.spyOn((server as any).processManager, 'stopConversation')
+        vi.spyOn((server as any).agentService, 'getActiveSessions').mockReturnValue(activeSessions);
+        vi.spyOn((server as any).agentService, 'stopConversation')
           .mockResolvedValueOnce(true)
           .mockRejectedValueOnce(new Error('Failed to stop session'));
         vi.spyOn((server as any).streamManager, 'disconnectAll').mockImplementation(() => {});
 
         await server.stop();
 
-        expect((server as any).processManager.stopConversation).toHaveBeenCalledTimes(2);
+        expect((server as any).agentService.stopConversation).toHaveBeenCalledTimes(2);
         expect((server as any).streamManager.disconnectAll).toHaveBeenCalled();
       });
     });
@@ -543,10 +529,10 @@ describe('CUIServer', () => {
       }
       
       // Set up method spies on the actual instances
-      vi.spyOn((server as any).processManager, 'getActiveSessions').mockReturnValue([]);
+      vi.spyOn((server as any).agentService, 'getActiveSessions').mockReturnValue([]);
       vi.spyOn((server as any).historyReader, 'fetchConversation').mockResolvedValue([]);
       vi.spyOn((server as any).historyReader, 'getConversationMetadata').mockResolvedValue(null);
-      vi.spyOn((server as any).processManager, 'stopConversation').mockResolvedValue(true);
+      vi.spyOn((server as any).agentService, 'stopConversation').mockResolvedValue(true);
       vi.spyOn((server as any).streamManager, 'addClient').mockImplementation(() => {});
     });
 
@@ -580,7 +566,7 @@ describe('CUIServer', () => {
         });
         // The execSync is already mocked via vi.mock
 
-        vi.spyOn((server as any).processManager, 'getActiveSessions').mockReturnValue(['session-1', 'session-2']);
+        vi.spyOn((server as any).agentService, 'getActiveSessions').mockReturnValue(['session-1', 'session-2']);
 
         const response = await request(app)
           .get('/api/system/status')
@@ -597,7 +583,7 @@ describe('CUIServer', () => {
 
       it('should handle system status error', async () => {
         // Mock getActiveSessions to throw error
-        vi.spyOn((server as any).processManager, 'getActiveSessions').mockImplementation(() => {
+        vi.spyOn((server as any).agentService, 'getActiveSessions').mockImplementation(() => {
           throw new Error('Process manager error');
         });
 
@@ -834,7 +820,7 @@ describe('CUIServer', () => {
 
     describe('POST /api/conversations/:streamingId/stop', () => {
       it('should stop conversation successfully', async () => {
-        vi.spyOn((server as any).processManager, 'stopConversation').mockResolvedValue(true);
+        vi.spyOn((server as any).agentService, 'stopConversation').mockResolvedValue(true);
 
         const response = await request(app)
           .post('/api/conversations/session-123/stop')
@@ -843,11 +829,11 @@ describe('CUIServer', () => {
         expect(response.body).toEqual({
           success: true
         });
-        expect((server as any).processManager.stopConversation).toHaveBeenCalledWith('session-123');
+        expect((server as any).agentService.stopConversation).toHaveBeenCalledWith('session-123');
       });
 
       it('should handle non-existent session', async () => {
-        vi.spyOn((server as any).processManager, 'stopConversation').mockResolvedValue(false);
+        vi.spyOn((server as any).agentService, 'stopConversation').mockResolvedValue(false);
 
         const response = await request(app)
           .post('/api/conversations/non-existent/stop')
@@ -859,7 +845,7 @@ describe('CUIServer', () => {
       });
 
       it('should handle stop conversation error', async () => {
-        vi.spyOn((server as any).processManager, 'stopConversation').mockRejectedValue(new Error('Stop failed'));
+        vi.spyOn((server as any).agentService, 'stopConversation').mockRejectedValue(new Error('Stop failed'));
 
         const response = await request(app)
           .post('/api/conversations/error-session/stop');
@@ -923,7 +909,7 @@ describe('CUIServer', () => {
           apiKeySource: 'env'
         };
 
-        vi.spyOn((server as any).processManager, 'startConversation')
+        vi.spyOn((server as any).agentService, 'startConversation')
           .mockResolvedValue({ streamingId: 'stream-123', systemInit: mockSystemInit });
 
         const response = await request(app)
@@ -935,7 +921,7 @@ describe('CUIServer', () => {
           .expect(200);
 
         // Verify process manager was called
-        expect((server as any).processManager.startConversation).toHaveBeenCalledWith({
+        expect((server as any).agentService.startConversation).toHaveBeenCalledWith({
           workingDirectory: '/test/project',
           initialPrompt: 'Hello Claude!'
         });
