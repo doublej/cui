@@ -35,9 +35,9 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development tsx watch src/server.ts",
-    "dev:web": "NODE_ENV=development npx vite",
+    "dev:web": "NODE_ENV=development bunx vite",
     "clean": "rm -rf dist",
-    "build": "npm run clean && NODE_ENV=production npm run build:web && tsc && tsc-alias",
+    "build": "bun run clean && NODE_ENV=production bun run build:web && tsc && tsc-alias",
     "build:web": "NODE_ENV=production vite build",
     "start": "NODE_ENV=production node dist/server.js",
     "test": "NODE_ENV=test vitest run",

@@ -10,8 +10,7 @@ const __dirname = dirname(__filename);
 
 // List of files that need executable permissions
 const executableFiles = [
-  'dist/mcp-server/index.js',
-  // Add more files here as needed
+  // Add files here as needed
 ];
 
 console.log('Setting executable permissions...');
