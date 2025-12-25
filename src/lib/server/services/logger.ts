@@ -1,4 +1,4 @@
-import pino, { Logger as PinoLogger } from 'pino';
+import pino, { type Logger as PinoLogger } from 'pino';
 import { PassThrough } from 'stream';
 import { LogFormatter } from './log-formatter.js';
 

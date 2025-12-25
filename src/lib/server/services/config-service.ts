@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
-import { CUIConfig, DEFAULT_CONFIG, InterfaceConfig, ServerConfig } from '$lib/server/types/config.js';
+import { DEFAULT_CONFIG, type CUIConfig, type InterfaceConfig, type ServerConfig } from '$lib/server/types/config.js';
 import { generateMachineId } from '$lib/server/utils/machine-id.js';
 import { createLogger, type Logger } from './logger.js';
 import { EventEmitter } from 'events';

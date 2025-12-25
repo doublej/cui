@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
-import { PermissionRequest } from '$lib/server/types/index.js';
+import type { PermissionRequest } from '$lib/server/types/index.js';
 import { logger } from '$lib/server/services/logger.js';
 import { NotificationService } from './notification-service.js';
 import { ConversationStatusManager } from './conversation-status-manager.js';

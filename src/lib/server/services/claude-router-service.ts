@@ -1,4 +1,4 @@
-import { RouterConfiguration } from '$lib/server/types/router-config.js';
+import type { RouterConfiguration } from '$lib/server/types/router-config.js';
 import { createLogger, type Logger } from './logger.js';
 import net from 'net';
 

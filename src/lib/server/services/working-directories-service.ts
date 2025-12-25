@@ -1,6 +1,6 @@
-import { WorkingDirectory, WorkingDirectoriesResponse } from '$lib/server/types/index.js';
+import type { WorkingDirectory, WorkingDirectoriesResponse } from '$lib/server/types/index.js';
 import { ClaudeHistoryReader } from './claude-history-reader.js';
-import { Logger } from './logger.js';
+import type { Logger } from './logger.js';
 
 export class WorkingDirectoriesService {
   private logger: Logger;

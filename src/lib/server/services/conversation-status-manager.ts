@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { createLogger, type Logger } from './logger.js';
-import { ConversationSummary, ConversationMessage, ConversationDetailsResponse } from '$lib/server/types/index.js';
+import type { ConversationSummary, ConversationMessage, ConversationDetailsResponse } from '$lib/server/types/index.js';
 
 /**
  * Context data stored for active conversations that have not yet been written to local directories

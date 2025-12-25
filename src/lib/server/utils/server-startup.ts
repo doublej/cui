@@ -1,4 +1,4 @@
-import { Logger } from '../services/logger.js';
+import type { Logger } from '../services/logger.js';
 
 export interface ServerStartupOptions {
   host: string;

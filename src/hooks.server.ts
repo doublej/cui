@@ -1,5 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
-import { ConfigService } from '$lib/server/services/config-service.js';
+import { initializeServices, getServices } from '$lib/server/services/index.js';
 
 // Initialize services on first request
 let initialized = false;
@@ -8,7 +8,7 @@ async function initServices(): Promise<void> {
 	if (initialized) return;
 
 	try {
-		await ConfigService.getInstance().initialize();
+		await initializeServices();
 		initialized = true;
 		console.log('[hooks.server] Services initialized');
 	} catch (error) {
@@ -45,7 +45,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const token = authHeader?.replace('Bearer ', '');
 
 	try {
-		const config = ConfigService.getInstance().getConfig();
+		const { configService } = getServices();
+		const config = configService.getConfig();
 
 		if (token !== config.authToken) {
 			return new Response(JSON.stringify({ error: 'Unauthorized' }), {

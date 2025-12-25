@@ -2,11 +2,11 @@ import { EventEmitter } from 'events';
 import { query, type PermissionResult, type SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  ConversationConfig,
-  SystemInitMessage,
-  StreamEvent,
   CUIError,
-  PermissionRequest,
+  type ConversationConfig,
+  type SystemInitMessage,
+  type StreamEvent,
+  type PermissionRequest,
 } from '$lib/server/types/index.js';
 import { createLogger, type Logger } from './logger.js';
 import { PermissionTracker } from './permission-tracker.js';

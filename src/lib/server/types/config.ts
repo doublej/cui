@@ -1,7 +1,7 @@
 /**
  * Configuration types for CUI
  */
-import { RouterConfiguration } from './router-config.js';
+import type { RouterConfiguration } from './router-config.js';
 
 export interface ServerConfig {
   host: string;
