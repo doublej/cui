@@ -101,7 +101,8 @@ class LoggerService {
 
   private constructor() {
     // Get log level from environment variable, default to 'info'
-    const logLevel = process.env.LOG_LEVEL || 'info';
+    // Normalize to lowercase as pino expects lowercase levels
+    const logLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
     
     // Create a pass-through stream to intercept logs
     this.logInterceptStream = new PassThrough();
