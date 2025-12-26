@@ -5,6 +5,7 @@ node_modules/
 # Build outputs
 dist/
 build/
+.svelte-kit/
 *.tsbuildinfo
 # Exclude React build output from backend
 public/dist/
