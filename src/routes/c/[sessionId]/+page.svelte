@@ -2,7 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { MessageList, Composer } from '$lib/components/chat/index.js';
+	import { MessageList, Composer, ConversationHeader } from '$lib/components/chat/index.js';
 	import { conversations, streamStore, currentConversation } from '$lib/stores/index.js';
 	import type { StreamEvent } from '$lib/server/types/index.js';
 
@@ -11,6 +11,7 @@
 	let isLoading = $state(true);
 	let isStreaming = $state(false);
 	let streamingId = $state<string | null>(null);
+	let workingDirectory = $state('');
 	let disconnectStream: (() => void) | null = null;
 
 	onMount(async () => {
@@ -26,6 +27,11 @@
 		if (!details) {
 			goto('/');
 			return;
+		}
+
+		// Set working directory from metadata
+		if (details.projectPath) {
+			workingDirectory = details.projectPath;
 		}
 
 		// Check if conversation is ongoing and connect to stream
@@ -51,18 +57,21 @@
 	}
 
 	async function handleSendMessage(message: string): Promise<void> {
-		// For now, start a new conversation with the message as continuation
-		// In a full implementation, this would send to an existing stream
 		const response = await conversations.start({
-			workingDirectory: $currentConversation?.projectPath || '.',
+			workingDirectory: workingDirectory || '.',
 			initialPrompt: message,
 			resumedSessionId: sessionId
 		});
 
 		if (response) {
-			streamingId = response.streamingId;
-			isStreaming = true;
-			disconnectStream = streamStore.connect(response.streamingId, handleStreamEvent);
+			// Navigate to the new session if it's different
+			if (response.sessionId !== sessionId) {
+				goto(`/c/${response.sessionId}`);
+			} else {
+				streamingId = response.streamingId;
+				isStreaming = true;
+				disconnectStream = streamStore.connect(response.streamingId, handleStreamEvent);
+			}
 		}
 	}
 
@@ -76,6 +85,12 @@
 </script>
 
 <div class="flex h-full flex-col">
+	<ConversationHeader
+		conversation={$currentConversation}
+		{isStreaming}
+		onStop={handleStop}
+	/>
+
 	{#if isLoading}
 		<div class="flex flex-1 items-center justify-center">
 			<div class="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
