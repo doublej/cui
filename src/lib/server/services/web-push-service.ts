@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import Database from 'better-sqlite3';
-import webpush, { PushSubscription } from 'web-push';
+import webpush, { type PushSubscription } from 'web-push';
 import { createLogger, type Logger } from './logger.js';
 import { ConfigService } from './config-service.js';
 
@@ -102,7 +102,7 @@ export class WebPushService {
 
   private configureVapid(): void {
     const config = this.configService.getConfig();
-    let subject = config.interface.notifications?.webPush?.subject || 'mailto:admin@example.com';
+    const subject = config.interface.notifications?.webPush?.subject || 'mailto:admin@example.com';
     let publicKey = config.interface.notifications?.webPush?.vapidPublicKey;
     let privateKey = config.interface.notifications?.webPush?.vapidPrivateKey;
 

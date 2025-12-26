@@ -1,0 +1,76 @@
+{
+	"/": [],
+	"/api/config": [
+		"src/routes/api/config/+server.ts"
+	],
+	"/api/conversations": [
+		"src/routes/api/conversations/+server.ts"
+	],
+	"/api/conversations/archive-all": [
+		"src/routes/api/conversations/archive-all/+server.ts"
+	],
+	"/api/conversations/start": [
+		"src/routes/api/conversations/start/+server.ts"
+	],
+	"/api/conversations/[sessionId]": [
+		"src/routes/api/conversations/[sessionId]/+server.ts"
+	],
+	"/api/conversations/[sessionId]/rename": [
+		"src/routes/api/conversations/[sessionId]/rename/+server.ts"
+	],
+	"/api/conversations/[streamingId]/stop": [
+		"src/routes/api/conversations/[streamingId]/stop/+server.ts"
+	],
+	"/api/conversations/[sessionId]/update": [
+		"src/routes/api/conversations/[sessionId]/update/+server.ts"
+	],
+	"/api/filesystem": [
+		"src/routes/api/filesystem/+server.ts"
+	],
+	"/api/gemini/health": [
+		"src/routes/api/gemini/health/+server.ts"
+	],
+	"/api/gemini/summarize": [
+		"src/routes/api/gemini/summarize/+server.ts"
+	],
+	"/api/gemini/transcribe": [
+		"src/routes/api/gemini/transcribe/+server.ts"
+	],
+	"/api/logs/recent": [
+		"src/routes/api/logs/recent/+server.ts"
+	],
+	"/api/logs/stream": [
+		"src/routes/api/logs/stream/+server.ts"
+	],
+	"/api/notifications/register": [
+		"src/routes/api/notifications/register/+server.ts"
+	],
+	"/api/notifications/status": [
+		"src/routes/api/notifications/status/+server.ts"
+	],
+	"/api/notifications/test": [
+		"src/routes/api/notifications/test/+server.ts"
+	],
+	"/api/notifications/unregister": [
+		"src/routes/api/notifications/unregister/+server.ts"
+	],
+	"/api/permissions": [
+		"src/routes/api/permissions/+server.ts"
+	],
+	"/api/permissions/notify": [
+		"src/routes/api/permissions/notify/+server.ts"
+	],
+	"/api/permissions/[requestId]/decision": [
+		"src/routes/api/permissions/[requestId]/decision/+server.ts"
+	],
+	"/api/stream/[streamingId]": [
+		"src/routes/api/stream/[streamingId]/+server.ts"
+	],
+	"/api/system/health": [
+		"src/routes/api/system/health/+server.ts"
+	],
+	"/api/working-directories": [
+		"src/routes/api/working-directories/+server.ts"
+	],
+	"/c/[sessionId]": []
+}

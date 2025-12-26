@@ -1,0 +1,443 @@
+{
+  ".svelte-kit/generated/server/internal.js": {
+    "file": "internal.js",
+    "name": "internal",
+    "src": ".svelte-kit/generated/server/internal.js",
+    "isEntry": true,
+    "imports": [
+      "_internal.js",
+      "_environment.js"
+    ]
+  },
+  "_Button.js": {
+    "file": "chunks/Button.js",
+    "name": "Button",
+    "imports": [
+      "_index.js"
+    ]
+  },
+  "_client.js": {
+    "file": "chunks/client.js",
+    "name": "client",
+    "imports": [
+      "_exports.js",
+      "_utils.js",
+      "_state.svelte.js"
+    ]
+  },
+  "_context.js": {
+    "file": "chunks/context.js",
+    "name": "context",
+    "imports": [
+      "_false.js"
+    ]
+  },
+  "_create.js": {
+    "file": "chunks/create.js",
+    "name": "create",
+    "imports": [
+      "_exports.js"
+    ]
+  },
+  "_environment.js": {
+    "file": "chunks/environment.js",
+    "name": "environment"
+  },
+  "_exports.js": {
+    "file": "chunks/exports.js",
+    "name": "exports",
+    "imports": [
+      "_context.js"
+    ]
+  },
+  "_false.js": {
+    "file": "chunks/false.js",
+    "name": "false"
+  },
+  "_gemini-service.js": {
+    "file": "chunks/gemini-service.js",
+    "name": "gemini-service",
+    "imports": [
+      "_index3.js"
+    ]
+  },
+  "_index.js": {
+    "file": "chunks/index.js",
+    "name": "index",
+    "imports": [
+      "_context.js"
+    ]
+  },
+  "_index2.js": {
+    "file": "chunks/index2.js",
+    "name": "index",
+    "imports": [
+      "_index3.js"
+    ]
+  },
+  "_index3.js": {
+    "file": "chunks/index3.js",
+    "name": "index",
+    "dynamicImports": [
+      "src/lib/server/services/log-stream-buffer.ts"
+    ]
+  },
+  "_internal.js": {
+    "file": "chunks/internal.js",
+    "name": "internal",
+    "imports": [
+      "_context.js",
+      "_index.js",
+      "_environment.js"
+    ],
+    "dynamicImports": [
+      "src/hooks.server.ts"
+    ]
+  },
+  "_shared.js": {
+    "file": "chunks/shared.js",
+    "name": "shared",
+    "imports": [
+      "_utils.js"
+    ]
+  },
+  "_state.svelte.js": {
+    "file": "chunks/state.svelte.js",
+    "name": "state.svelte",
+    "imports": [
+      "_context.js"
+    ]
+  },
+  "_stores.js": {
+    "file": "chunks/stores.js",
+    "name": "stores",
+    "imports": [
+      "_context.js",
+      "_exports.js",
+      "_utils.js",
+      "_state.svelte.js"
+    ]
+  },
+  "_utils.js": {
+    "file": "chunks/utils.js",
+    "name": "utils"
+  },
+  "node_modules/@sveltejs/kit/src/runtime/app/server/remote/index.js": {
+    "file": "remote-entry.js",
+    "name": "remote-entry",
+    "src": "node_modules/@sveltejs/kit/src/runtime/app/server/remote/index.js",
+    "isEntry": true,
+    "imports": [
+      "_shared.js",
+      "_false.js",
+      "_environment.js"
+    ]
+  },
+  "node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte": {
+    "file": "entries/fallbacks/error.svelte.js",
+    "name": "entries/fallbacks/error.svelte",
+    "src": "node_modules/@sveltejs/kit/src/runtime/components/svelte-5/error.svelte",
+    "isEntry": true,
+    "imports": [
+      "_context.js",
+      "_state.svelte.js",
+      "_client.js"
+    ]
+  },
+  "node_modules/@sveltejs/kit/src/runtime/server/index.js": {
+    "file": "index.js",
+    "name": "index",
+    "src": "node_modules/@sveltejs/kit/src/runtime/server/index.js",
+    "isEntry": true,
+    "imports": [
+      "_false.js",
+      "_environment.js",
+      "_shared.js",
+      "_exports.js",
+      "_utils.js",
+      "_internal.js"
+    ]
+  },
+  "src/hooks.server.ts": {
+    "file": "chunks/hooks.server.js",
+    "name": "hooks.server",
+    "src": "src/hooks.server.ts",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/lib/server/services/log-stream-buffer.ts": {
+    "file": "chunks/log-stream-buffer.js",
+    "name": "log-stream-buffer",
+    "src": "src/lib/server/services/log-stream-buffer.ts",
+    "isDynamicEntry": true
+  },
+  "src/routes/+layout.svelte": {
+    "file": "entries/pages/_layout.svelte.js",
+    "name": "entries/pages/_layout.svelte",
+    "src": "src/routes/+layout.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_stores.js",
+      "_create.js",
+      "_client.js",
+      "_Button.js",
+      "_context.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_layout.CUl7L_bb.css"
+    ]
+  },
+  "src/routes/+page.svelte": {
+    "file": "entries/pages/_page.svelte.js",
+    "name": "entries/pages/_page.svelte",
+    "src": "src/routes/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_context.js",
+      "_client.js",
+      "_Button.js",
+      "_create.js"
+    ]
+  },
+  "src/routes/api/config/+server.ts": {
+    "file": "entries/endpoints/api/config/_server.ts.js",
+    "name": "entries/endpoints/api/config/_server.ts",
+    "src": "src/routes/api/config/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/conversations/+server.ts": {
+    "file": "entries/endpoints/api/conversations/_server.ts.js",
+    "name": "entries/endpoints/api/conversations/_server.ts",
+    "src": "src/routes/api/conversations/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/conversations/[sessionId]/+server.ts": {
+    "file": "entries/endpoints/api/conversations/_sessionId_/_server.ts.js",
+    "name": "entries/endpoints/api/conversations/_sessionId_/_server.ts",
+    "src": "src/routes/api/conversations/[sessionId]/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/conversations/[sessionId]/rename/+server.ts": {
+    "file": "entries/endpoints/api/conversations/_sessionId_/rename/_server.ts.js",
+    "name": "entries/endpoints/api/conversations/_sessionId_/rename/_server.ts",
+    "src": "src/routes/api/conversations/[sessionId]/rename/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/conversations/[sessionId]/update/+server.ts": {
+    "file": "entries/endpoints/api/conversations/_sessionId_/update/_server.ts.js",
+    "name": "entries/endpoints/api/conversations/_sessionId_/update/_server.ts",
+    "src": "src/routes/api/conversations/[sessionId]/update/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/conversations/[streamingId]/stop/+server.ts": {
+    "file": "entries/endpoints/api/conversations/_streamingId_/stop/_server.ts.js",
+    "name": "entries/endpoints/api/conversations/_streamingId_/stop/_server.ts",
+    "src": "src/routes/api/conversations/[streamingId]/stop/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/conversations/archive-all/+server.ts": {
+    "file": "entries/endpoints/api/conversations/archive-all/_server.ts.js",
+    "name": "entries/endpoints/api/conversations/archive-all/_server.ts",
+    "src": "src/routes/api/conversations/archive-all/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/conversations/start/+server.ts": {
+    "file": "entries/endpoints/api/conversations/start/_server.ts.js",
+    "name": "entries/endpoints/api/conversations/start/_server.ts",
+    "src": "src/routes/api/conversations/start/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/filesystem/+server.ts": {
+    "file": "entries/endpoints/api/filesystem/_server.ts.js",
+    "name": "entries/endpoints/api/filesystem/_server.ts",
+    "src": "src/routes/api/filesystem/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/gemini/health/+server.ts": {
+    "file": "entries/endpoints/api/gemini/health/_server.ts.js",
+    "name": "entries/endpoints/api/gemini/health/_server.ts",
+    "src": "src/routes/api/gemini/health/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_gemini-service.js"
+    ]
+  },
+  "src/routes/api/gemini/summarize/+server.ts": {
+    "file": "entries/endpoints/api/gemini/summarize/_server.ts.js",
+    "name": "entries/endpoints/api/gemini/summarize/_server.ts",
+    "src": "src/routes/api/gemini/summarize/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_gemini-service.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/gemini/transcribe/+server.ts": {
+    "file": "entries/endpoints/api/gemini/transcribe/_server.ts.js",
+    "name": "entries/endpoints/api/gemini/transcribe/_server.ts",
+    "src": "src/routes/api/gemini/transcribe/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_gemini-service.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/logs/recent/+server.ts": {
+    "file": "entries/endpoints/api/logs/recent/_server.ts.js",
+    "name": "entries/endpoints/api/logs/recent/_server.ts",
+    "src": "src/routes/api/logs/recent/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "src/lib/server/services/log-stream-buffer.ts"
+    ]
+  },
+  "src/routes/api/logs/stream/+server.ts": {
+    "file": "entries/endpoints/api/logs/stream/_server.ts.js",
+    "name": "entries/endpoints/api/logs/stream/_server.ts",
+    "src": "src/routes/api/logs/stream/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "src/lib/server/services/log-stream-buffer.ts"
+    ]
+  },
+  "src/routes/api/notifications/register/+server.ts": {
+    "file": "entries/endpoints/api/notifications/register/_server.ts.js",
+    "name": "entries/endpoints/api/notifications/register/_server.ts",
+    "src": "src/routes/api/notifications/register/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/notifications/status/+server.ts": {
+    "file": "entries/endpoints/api/notifications/status/_server.ts.js",
+    "name": "entries/endpoints/api/notifications/status/_server.ts",
+    "src": "src/routes/api/notifications/status/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/notifications/test/+server.ts": {
+    "file": "entries/endpoints/api/notifications/test/_server.ts.js",
+    "name": "entries/endpoints/api/notifications/test/_server.ts",
+    "src": "src/routes/api/notifications/test/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/notifications/unregister/+server.ts": {
+    "file": "entries/endpoints/api/notifications/unregister/_server.ts.js",
+    "name": "entries/endpoints/api/notifications/unregister/_server.ts",
+    "src": "src/routes/api/notifications/unregister/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/permissions/+server.ts": {
+    "file": "entries/endpoints/api/permissions/_server.ts.js",
+    "name": "entries/endpoints/api/permissions/_server.ts",
+    "src": "src/routes/api/permissions/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/permissions/[requestId]/decision/+server.ts": {
+    "file": "entries/endpoints/api/permissions/_requestId_/decision/_server.ts.js",
+    "name": "entries/endpoints/api/permissions/_requestId_/decision/_server.ts",
+    "src": "src/routes/api/permissions/[requestId]/decision/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/permissions/notify/+server.ts": {
+    "file": "entries/endpoints/api/permissions/notify/_server.ts.js",
+    "name": "entries/endpoints/api/permissions/notify/_server.ts",
+    "src": "src/routes/api/permissions/notify/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js",
+      "_index3.js"
+    ]
+  },
+  "src/routes/api/stream/[streamingId]/+server.ts": {
+    "file": "entries/endpoints/api/stream/_streamingId_/_server.ts.js",
+    "name": "entries/endpoints/api/stream/_streamingId_/_server.ts",
+    "src": "src/routes/api/stream/[streamingId]/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/api/system/health/+server.ts": {
+    "file": "entries/endpoints/api/system/health/_server.ts.js",
+    "name": "entries/endpoints/api/system/health/_server.ts",
+    "src": "src/routes/api/system/health/+server.ts",
+    "isEntry": true
+  },
+  "src/routes/api/working-directories/+server.ts": {
+    "file": "entries/endpoints/api/working-directories/_server.ts.js",
+    "name": "entries/endpoints/api/working-directories/_server.ts",
+    "src": "src/routes/api/working-directories/+server.ts",
+    "isEntry": true,
+    "imports": [
+      "_index2.js"
+    ]
+  },
+  "src/routes/c/[sessionId]/+page.svelte": {
+    "file": "entries/pages/c/_sessionId_/_page.svelte.js",
+    "name": "entries/pages/c/_sessionId_/_page.svelte",
+    "src": "src/routes/c/[sessionId]/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_index.js",
+      "_context.js",
+      "_stores.js",
+      "_exports.js",
+      "_utils.js",
+      "_state.svelte.js",
+      "_create.js"
+    ]
+  }
+}

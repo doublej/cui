@@ -10,5 +10,14 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		host: '0.0.0.0'
+	},
+	build: {
+		rollupOptions: {
+			external: ['web-push', 'better-sqlite3', '@musistudio/llms']
+		}
+	},
+	ssr: {
+		external: ['web-push', 'better-sqlite3', '@musistudio/llms'],
+		noExternal: []
 	}
 });
